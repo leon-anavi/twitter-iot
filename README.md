@@ -1,4 +1,4 @@
-# Twitter-iot
+# Twitter-IoT
 Twitter bot connected to Internet of Things (IoT). The bot has the following capabilities:
 * Retieve tweets depending on configured text (with or without hashtags)
 * Retweet found tweets (can be disabled through the configurations)
