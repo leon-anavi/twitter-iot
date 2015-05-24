@@ -14,7 +14,10 @@ module.exports = {
 
 };
 
-function search(handle, search, configRetweet, configFavorite, since, callback) {
+function search(handle, mqttClient, search,
+                configRetweet, configFavorite, configTweetsCount,
+                configMqtt, mqttTopic, mqttMessage,
+                since, callback) {
 
   //Set a default value for since
   if (typeof since === "undefined") {
@@ -22,7 +25,8 @@ function search(handle, search, configRetweet, configFavorite, since, callback) 
   }
 
   //Search for tweets
-  handle.get('search/tweets', { q: search, result_type: 'recent', since_id: since, count: 3 }, function(err, data, response) {
+  handle.get('search/tweets', { q: search, result_type: 'recent',
+    since_id: since, count: configTweetsCount }, function(err, data, response) {
 
     //Ignore the last processed tweet ID if it is among new results
 
@@ -46,6 +50,10 @@ function search(handle, search, configRetweet, configFavorite, since, callback) 
 
       if (true === configFavorite) {
         favorite(handle, status.id_str);
+      }
+
+      if (true === configMqtt) {
+        mqttClient.publish(mqttTopic, mqttMessage);
       }
 
       console.log('ID: '+status.id);

@@ -1,4 +1,5 @@
 var db = null;
+var mqttClient = null;
 
 try {
   var Promise = require('promise');
@@ -13,29 +14,45 @@ try {
   var collections = ["crawler"];
   var db = require("mongojs").connect(databaseUrl, collections);
 
+  var mqtt = require('mqtt');
+  var mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
+
   var utilsData = require('./data');
 
-  //The first promise read the value of the last processed tweet id from the db
-  //The second promise finds the latest tweets (after the last processed)
-  //The third promise saves the biggest ID of the latest tweets in the db
+  //The 1st promise connects to MQTT broker
+  //The 2nd promise read the value of the last processed tweet id from the db
+  //The 3rd promise finds the latest tweets (after the last processed)
+  //The 4th promise saves the biggest ID of the latest tweets in the db
   //Finally the db is closed
   var promise = new Promise(function (resolve, reject) {
-    //Retrive last proceed tweet id
-    utilsData.getLastTweetId(db, function(res) { resolve(res); });
+    mqttClient.on('connect', function () { resolve(); });
   });
-  promise.then(function(lastTweetId) {
+  promise.then(function() {
+    return new Promise(function (resolve, reject) {
+      //Retrive last proceed tweet id
+      utilsData.getLastTweetId(db, function(res) { resolve(res); });
+    });
+  })
+  .then(function(lastTweetId) {
     //Searching for new tweets
     return new Promise(function (resolve, reject) {
-      utilsTwitter.search(T, configurations.search,
-                          configurations.retweet, configurations.favorite,
+      utilsTwitter.search(T, mqttClient, configurations.search,
+                          configurations.retweet,
+                          configurations.favorite,
+                          configurations.tweetsCount,
+                          configurations.mqtt.enabled,
+                          configurations.mqtt.topic,
+                          configurations.mqtt.message,
                           lastTweetId, function(err, res) {
         if (null === err) {
           resolve(res);
         }
         else {
           // new tweets have not been found
-          // close the database and reject the second promise
+          // close the database, disconnect from MQTT broker
+          // and reject the second promise
           db.close();
+          mqttClient.end();
           reject(err);
           console.log(err);
         }
@@ -51,8 +68,9 @@ try {
     });
   })
   .then(function() {
-    //Everything is done, disconnect for the db
+    //Everything is done, disconnect from the db and the MQTT client
     db.close();
+    mqttClient.end();
   });
 
 
@@ -60,9 +78,14 @@ try {
 }
 catch(err) {
 
-  //Disconnect for the database on error
+  //Disconnect the database on error
   if (null !== db) {
     db.close();
+  }
+
+  //Disconnect the MQTT client on error
+  if (null !== mqttClient) {
+    mqttClient.end();
   }
 
   if ( (typeof err.code !== 'undefined') && ('MODULE_NOT_FOUND' === err.code) ) {
