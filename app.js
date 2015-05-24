@@ -26,7 +26,9 @@ try {
   promise.then(function(lastTweetId) {
     //Searching for new tweets
     return new Promise(function (resolve, reject) {
-      utilsTwitter.search(T, configurations.search, lastTweetId, function(err, res) {
+      utilsTwitter.search(T, configurations.search,
+                          configurations.retweet, configurations.favorite,
+                          lastTweetId, function(err, res) {
         if (null === err) {
           resolve(res);
         }

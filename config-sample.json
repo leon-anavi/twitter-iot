@@ -5,5 +5,7 @@
     "access_token":         "",
     "access_token_secret":  ""
   },
-  "search": "#tizen"
+  "search": "#tizen #Tizen",
+  "retweet": false,
+  "favorite": false
 }
