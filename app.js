@@ -1,3 +1,26 @@
+function handleError(err) {
+  //Disconnect the database on error
+  if (null !== db) {
+    db.close();
+  }
+
+  //Disconnect the MQTT client on error
+  if (null !== mqttClient) {
+    mqttClient.end();
+  }
+
+  if ( (typeof err.code !== 'undefined') && ('MODULE_NOT_FOUND' === err.code) ) {
+    console.log('Error: please create config.json and save in it Twitter credentials.');
+    console.log('Example configuration is provided in config-sample.json');
+  }
+  else if (typeof err.message !== 'undefined') {
+    console.log('Error: '+err.message);
+  }
+  else {
+    console.log(err);
+  }
+}
+
 var db = null;
 var mqttClient = null;
 
@@ -15,12 +38,7 @@ try {
   var db = require("mongojs").connect(databaseUrl, collections);
 
   db.on('error', function(err) {
-    console.log('MongoDB '+err);
-
-    //Disconnect the MQTT client on error
-    if (null !== mqttClient) {
-      mqttClient.end();
-    }
+    handleError('MongoDB '+err);
     process.exit();
   });
 
@@ -47,13 +65,8 @@ try {
       if (true === isMqttConnectionEstablished) {
         return;
       }
-
-      if (null !== db) {
-        db.close();
-      }
-      mqttClient.end();
+      handleError('Cannot connect to MQTT broker.');
       reject();
-      console.log('Cannot connect to MQTT broker.');
       process.exit();
     });
   });
@@ -81,10 +94,8 @@ try {
           // new tweets have not been found
           // close the database, disconnect from MQTT broker
           // and reject the second promise
-          db.close();
-          mqttClient.end();
           reject(err);
-          console.log(err);
+          handleError(err);
         }
       });
     });
@@ -102,30 +113,8 @@ try {
     db.close();
     mqttClient.end();
   });
-
-
   //utilsTwitter.updateStatus(T, 'cool :)');
 }
 catch(err) {
-
-  //Disconnect the database on error
-  if (null !== db) {
-    db.close();
-  }
-
-  //Disconnect the MQTT client on error
-  if (null !== mqttClient) {
-    mqttClient.end();
-  }
-
-  if ( (typeof err.code !== 'undefined') && ('MODULE_NOT_FOUND' === err.code) ) {
-    console.log('Error: please create config.json and save in it Twitter credentials.');
-    console.log('Example configuration is provided in config-sample.json');
-  }
-  else if (typeof err.message !== 'undefined') {
-    console.log('Error: '+err.message);
-  }
-  else {
-    console.log('Unknown error: '+err);
-  }
+  handleError(err);
 }
