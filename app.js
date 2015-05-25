@@ -25,7 +25,7 @@ try {
   });
 
   var mqtt = require('mqtt');
-  var mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
+  var isMqttConnectionEstablished = false;
 
   var utilsData = require('./data');
 
@@ -35,7 +35,27 @@ try {
   //The 4th promise saves the biggest ID of the latest tweets in the db
   //Finally the db is closed
   var promise = new Promise(function (resolve, reject) {
-    mqttClient.on('connect', function () { resolve(); });
+    mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
+    mqttClient.on('connect', function () {
+      isMqttConnectionEstablished = true;
+      resolve();
+    });
+    mqttClient.on('close', function () {
+
+      //If connection has been established once then there is no need
+      //to report and handle connection issues in this event
+      if (true === isMqttConnectionEstablished) {
+        return;
+      }
+
+      if (null !== db) {
+        db.close();
+      }
+      mqttClient.end();
+      reject();
+      console.log('Cannot connect to MQTT broker.');
+      process.exit();
+    });
   });
   promise.then(function() {
     return new Promise(function (resolve, reject) {
