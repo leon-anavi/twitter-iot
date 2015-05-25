@@ -1,11 +1,3 @@
-module.exports = {
-
-  getLastTweetId : getLastTweetId,
-
-  setLastTweetId : setLastTweetId,
-
-};
-
 function getLastTweetId(db, callback) {
 
   db.crawler.find({type: "since"}, function(err, data) {
@@ -51,3 +43,11 @@ function setLastTweetId(db, tweetId, callback) {
   });
 
 }
+
+module.exports = {
+
+  getLastTweetId : getLastTweetId,
+
+  setLastTweetId : setLastTweetId,
+
+};

@@ -1,19 +1,3 @@
-module.exports = {
-  updateStatus: function (handle, message) {
-    handle.post('statuses/update', { status: message }, function(err, data, response) {
-      if (null === err){
-        console.log('OK - status updated.');
-      }
-      else {
-        console.log('FAIL - '+err);
-      }
-    });
-  },
-
-  search: search,
-
-};
-
 function search(handle, mqttClient, search,
                 configRetweet, configFavorite, configTweetsCount,
                 configMqtt, mqttTopic, mqttMessage,
@@ -85,3 +69,19 @@ function favorite(handle, tweetId) {
     }
   });
 }
+
+module.exports = {
+  updateStatus: function (handle, message) {
+    handle.post('statuses/update', { status: message }, function(err, data, response) {
+      if (null === err){
+        console.log('OK - status updated.');
+      }
+      else {
+        console.log('FAIL - '+err);
+      }
+    });
+  },
+
+  search: search,
+
+};
