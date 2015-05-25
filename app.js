@@ -14,6 +14,16 @@ try {
   var collections = ["crawler"];
   var db = require("mongojs").connect(databaseUrl, collections);
 
+  db.on('error', function(err) {
+    console.log('MongoDB '+err);
+
+    //Disconnect the MQTT client on error
+    if (null !== mqttClient) {
+      mqttClient.end();
+    }
+    process.exit();
+  });
+
   var mqtt = require('mqtt');
   var mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
 
