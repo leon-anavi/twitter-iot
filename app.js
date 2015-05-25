@@ -82,6 +82,8 @@ try {
       utilsTwitter.search(T, mqttClient, configurations.search,
                           configurations.retweet,
                           configurations.favorite,
+                          configurations.reply,
+                          configurations.replyMessage,
                           configurations.tweetsCount,
                           configurations.mqtt.enabled,
                           configurations.mqtt.topic,
@@ -113,7 +115,6 @@ try {
     db.close();
     mqttClient.end();
   });
-  //utilsTwitter.updateStatus(T, 'cool :)');
 }
 catch(err) {
   handleError(err);

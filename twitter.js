@@ -1,5 +1,7 @@
 function search(handle, mqttClient, search,
-                configRetweet, configFavorite, configTweetsCount,
+                configRetweet, configFavorite,
+                configReply, configReplyMessage,
+                configTweetsCount,
                 configMqtt, mqttTopic, mqttMessage,
                 since, callback) {
 
@@ -13,7 +15,7 @@ function search(handle, mqttClient, search,
     since_id: since, count: configTweetsCount }, function(err, data, response) {
 
     if (null !== err) {
-      callback(err,0);
+      callback(err, 0);
       return;
     }
 
@@ -42,6 +44,12 @@ function search(handle, mqttClient, search,
 
       if (true === configMqtt) {
         mqttClient.publish(mqttTopic, mqttMessage);
+      }
+
+      if (true === configReply) {
+        updateStatus(handle,
+          '@'+status.user.screen_name+' '+configReplyMessage,
+          status.id_str);
       }
 
       console.log('ID: '+status.id);
@@ -74,17 +82,21 @@ function favorite(handle, tweetId) {
   });
 }
 
+function updateStatus(handle, message, replyId) {
+  handle.post('statuses/update', { status: message,
+    in_reply_to_status_id: replyId }, function(err, data, response) {
+    if (null === err){
+      console.log('OK - status updated.');
+    }
+    else {
+      console.log('FAIL - '+err);
+    }
+  });
+}
+
 module.exports = {
-  updateStatus: function (handle, message) {
-    handle.post('statuses/update', { status: message }, function(err, data, response) {
-      if (null === err){
-        console.log('OK - status updated.');
-      }
-      else {
-        console.log('FAIL - '+err);
-      }
-    });
-  },
+
+  updateStatus: updateStatus,
 
   search: search,
 

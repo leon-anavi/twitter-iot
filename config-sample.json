@@ -8,6 +8,8 @@
   "search": "#tizen #Tizen",
   "retweet": false,
   "favorite": false,
+  "reply": false,
+  "replyMessage": "thanks for sharing!",
   "tweetsCount": 10,
   "mqtt": {
     "hostname": "example.com",

@@ -1,9 +1,12 @@
 # Twitter-IoT
-Twitter bot connected to Internet of Things (IoT). The bot has the following capabilities:
-* Retieve tweets depending on configured text (with or without hashtags)
-* Retweet found tweets (can be disabled through the configurations)
-* Favorite found tweets (can be disabled through the configurations)
-* Publish message to MQTT broker (can be disabled through the configurations)
+Twitter bot connected to Internet of Things (IoT). The bot offer the following features:
+* Retrieve tweets depending on configured text (with or without hashtags)
+* Retweet found tweets
+* Favorite found tweets
+* Reply to found tweets
+* Publish message to MQTT broker
+
+All features are optional and can be easily enabled or disabled through a configuration file.
 
 ##Installation
 
