@@ -10,8 +10,8 @@
   "favorite": false,
   "tweetsCount": 10,
   "mqtt": {
-    "hostname":"example.com",
-    "topic":"iot",
+    "hostname": "example.com",
+    "topic": "iot",
     "message": "Hello MQTT",
     "enabled": true
   }

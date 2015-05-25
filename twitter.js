@@ -12,8 +12,12 @@ function search(handle, mqttClient, search,
   handle.get('search/tweets', { q: search, result_type: 'recent',
     since_id: since, count: configTweetsCount }, function(err, data, response) {
 
-    //Ignore the last processed tweet ID if it is among new results
+    if (null !== err) {
+      callback(err,0);
+      return;
+    }
 
+    //Ignore the last processed tweet ID if it is among new results
     if ( (0 >= data.statuses.length) || (since === data.statuses[0].id) ) {
       callback('No new tweets found', since);
     }
