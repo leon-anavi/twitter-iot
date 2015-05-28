@@ -1,15 +1,16 @@
 var db = null;
+var mqtt = require('mqtt');
 var mqttClient = null;
 var configurations = require('./config.json');
 
 function handleError(err) {
   //Disconnect the database on error
-  if (null !== db) {
+  if ( (false === configurations.infinite) && (null !== db) ) {
     db.close();
   }
 
   //Disconnect the MQTT client on error
-  if (null !== mqttClient) {
+  if ( (false === configurations.infinite) && (null !== mqttClient) ) {
     mqttClient.end();
   }
 
@@ -22,6 +23,10 @@ function handleError(err) {
   }
   else {
     console.log(err);
+  }
+
+  if (false === configurations.infinite) {
+    process.exit();
   }
 }
 
@@ -36,14 +41,14 @@ function run() {
 
     var databaseUrl = "twitter-iot";
     var collections = ["crawler"];
-    var db = require("mongojs").connect(databaseUrl, collections);
+    if (null === db) {
+      db = require("mongojs").connect(databaseUrl, collections);
+    }
 
     db.on('error', function(err) {
       handleError('MongoDB '+err);
-      process.exit();
     });
 
-    var mqtt = require('mqtt');
     var isMqttConnectionEstablished = false;
 
     var utilsData = require('./data');
@@ -54,13 +59,17 @@ function run() {
     //The 4th promise saves the biggest ID of the latest tweets in the db
     //Finally the db is closed
     var promise = new Promise(function (resolve, reject) {
+
+      if (null !== mqttClient) {
+        resolve();
+      }
+
       mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
       mqttClient.on('connect', function () {
         isMqttConnectionEstablished = true;
         resolve();
       });
       mqttClient.on('close', function () {
-
         //If connection has been established once then there is no need
         //to report and handle connection issues in this event
         if (true === isMqttConnectionEstablished) {
@@ -68,7 +77,6 @@ function run() {
         }
         handleError('Cannot connect to MQTT broker.');
         reject();
-        process.exit();
       });
     });
     promise.then(function() {
@@ -113,8 +121,10 @@ function run() {
     })
     .then(function() {
       //Everything is done, disconnect from the db and the MQTT client
-      db.close();
-      mqttClient.end();
+      if (false === configurations.infinite) {
+        db.close();
+        mqttClient.end();
+      }
     });
   }
   catch(err) {
@@ -125,6 +135,5 @@ function run() {
 run();
 
 if (true === configurations.infinite) {
-  var timerId = setInterval(run, configurations.duration*1000);
-  timerId.unref();
+  setInterval(run, configurations.duration*1000);
 }
