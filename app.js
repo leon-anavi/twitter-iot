@@ -1,3 +1,7 @@
+var db = null;
+var mqttClient = null;
+var configurations = require('./config.json');
+
 function handleError(err) {
   //Disconnect the database on error
   if (null !== db) {
@@ -21,101 +25,106 @@ function handleError(err) {
   }
 }
 
-var db = null;
-var mqttClient = null;
+function run() {
+  try {
+    var Promise = require('promise');
 
-try {
-  var Promise = require('promise');
+    var Twit = require('twit')
+    var T = new Twit(configurations.twitter);
 
-  var configurations = require('./config.json');
-  var Twit = require('twit')
-  var T = new Twit(configurations.twitter);
+    var utilsTwitter = require('./twitter');
 
-  var utilsTwitter = require('./twitter');
+    var databaseUrl = "twitter-iot";
+    var collections = ["crawler"];
+    var db = require("mongojs").connect(databaseUrl, collections);
 
-  var databaseUrl = "twitter-iot";
-  var collections = ["crawler"];
-  var db = require("mongojs").connect(databaseUrl, collections);
-
-  db.on('error', function(err) {
-    handleError('MongoDB '+err);
-    process.exit();
-  });
-
-  var mqtt = require('mqtt');
-  var isMqttConnectionEstablished = false;
-
-  var utilsData = require('./data');
-
-  //The 1st promise connects to MQTT broker
-  //The 2nd promise read the value of the last processed tweet id from the db
-  //The 3rd promise finds the latest tweets (after the last processed)
-  //The 4th promise saves the biggest ID of the latest tweets in the db
-  //Finally the db is closed
-  var promise = new Promise(function (resolve, reject) {
-    mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
-    mqttClient.on('connect', function () {
-      isMqttConnectionEstablished = true;
-      resolve();
-    });
-    mqttClient.on('close', function () {
-
-      //If connection has been established once then there is no need
-      //to report and handle connection issues in this event
-      if (true === isMqttConnectionEstablished) {
-        return;
-      }
-      handleError('Cannot connect to MQTT broker.');
-      reject();
+    db.on('error', function(err) {
+      handleError('MongoDB '+err);
       process.exit();
     });
-  });
-  promise.then(function() {
-    return new Promise(function (resolve, reject) {
-      //Retrive last proceed tweet id
-      utilsData.getLastTweetId(db, function(res) { resolve(res); });
-    });
-  })
-  .then(function(lastTweetId) {
-    //Searching for new tweets
-    return new Promise(function (resolve, reject) {
-      utilsTwitter.search(T, mqttClient, configurations.search,
-                          configurations.retweet,
-                          configurations.favorite,
-                          configurations.reply,
-                          configurations.replyMessage,
-                          configurations.tweetsCount,
-                          configurations.mqtt.enabled,
-                          configurations.mqtt.topic,
-                          configurations.mqtt.message,
-                          lastTweetId, function(err, res) {
-        if (null === err) {
-          resolve(res);
-        }
-        else {
-          // new tweets have not been found
-          // close the database, disconnect from MQTT broker
-          // and reject the second promise
-          reject(err);
-          handleError(err);
-        }
-      });
-    });
-  })
-  .then(function(tweetId) {
-    //Save the latest tweet ID to the db
-    return new Promise(function (resolve, reject) {
-      utilsData.setLastTweetId(db, tweetId, function() {
+
+    var mqtt = require('mqtt');
+    var isMqttConnectionEstablished = false;
+
+    var utilsData = require('./data');
+
+    //The 1st promise connects to MQTT broker
+    //The 2nd promise read the value of the last processed tweet id from the db
+    //The 3rd promise finds the latest tweets (after the last processed)
+    //The 4th promise saves the biggest ID of the latest tweets in the db
+    //Finally the db is closed
+    var promise = new Promise(function (resolve, reject) {
+      mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
+      mqttClient.on('connect', function () {
+        isMqttConnectionEstablished = true;
         resolve();
       });
+      mqttClient.on('close', function () {
+
+        //If connection has been established once then there is no need
+        //to report and handle connection issues in this event
+        if (true === isMqttConnectionEstablished) {
+          return;
+        }
+        handleError('Cannot connect to MQTT broker.');
+        reject();
+        process.exit();
+      });
     });
-  })
-  .then(function() {
-    //Everything is done, disconnect from the db and the MQTT client
-    db.close();
-    mqttClient.end();
-  });
+    promise.then(function() {
+      return new Promise(function (resolve, reject) {
+        //Retrive last proceed tweet id
+        utilsData.getLastTweetId(db, function(res) { resolve(res); });
+      });
+    })
+    .then(function(lastTweetId) {
+      //Searching for new tweets
+      return new Promise(function (resolve, reject) {
+        utilsTwitter.search(T, mqttClient, configurations.search,
+                            configurations.retweet,
+                            configurations.favorite,
+                            configurations.reply,
+                            configurations.replyMessage,
+                            configurations.tweetsCount,
+                            configurations.mqtt.enabled,
+                            configurations.mqtt.topic,
+                            configurations.mqtt.message,
+                            lastTweetId, function(err, res) {
+          if (null === err) {
+            resolve(res);
+          }
+          else {
+            // new tweets have not been found
+            // close the database, disconnect from MQTT broker
+            // and reject the second promise
+            reject(err);
+            handleError(err);
+          }
+        });
+      });
+    })
+    .then(function(tweetId) {
+      //Save the latest tweet ID to the db
+      return new Promise(function (resolve, reject) {
+        utilsData.setLastTweetId(db, tweetId, function() {
+          resolve();
+        });
+      });
+    })
+    .then(function() {
+      //Everything is done, disconnect from the db and the MQTT client
+      db.close();
+      mqttClient.end();
+    });
+  }
+  catch(err) {
+    handleError(err);
+  }
 }
-catch(err) {
-  handleError(err);
+
+run();
+
+if (true === configurations.infinite) {
+  var timerId = setInterval(run, configurations.duration*1000);
+  timerId.unref();
 }

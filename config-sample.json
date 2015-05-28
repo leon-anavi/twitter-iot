@@ -16,5 +16,7 @@
     "topic": "iot",
     "message": "Hello MQTT",
     "enabled": true
-  }
+  },
+  "infinite": true,
+  "duration": 10
 }
