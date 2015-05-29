@@ -1,18 +1,8 @@
 var db = null;
 var mqtt = require('mqtt');
 var mqttClient = null;
-var configurations = require('./config.json');
 
 function handleError(err) {
-  //Disconnect the database on error
-  if ( (false === configurations.infinite) && (null !== db) ) {
-    db.close();
-  }
-
-  //Disconnect the MQTT client on error
-  if ( (false === configurations.infinite) && (null !== mqttClient) ) {
-    mqttClient.end();
-  }
 
   if ( (typeof err.code !== 'undefined') && ('MODULE_NOT_FOUND' === err.code) ) {
     console.log('Error: please create config.json and save in it Twitter credentials.');
@@ -25,13 +15,29 @@ function handleError(err) {
     console.log(err);
   }
 
-  if (false === configurations.infinite) {
+  if (typeof configurations !== "undefined") {
+    //Disconnect the database on error
+    if ( (false === configurations.infinite) && (null !== db) ) {
+      db.close();
+    }
+
+    //Disconnect the MQTT client on error
+    if ( (false === configurations.infinite) && (null !== mqttClient) ) {
+      mqttClient.end();
+    }
+    if (false === configurations.infinite) {
+      process.exit();
+    }
+  }
+  else {
+    // Terminate the script if configurations are not set
     process.exit();
   }
 }
 
 function run() {
   try {
+    var configurations = require('./config.json');
     var Promise = require('promise');
 
     var Twit = require('twit')
@@ -62,6 +68,7 @@ function run() {
 
       if (null !== mqttClient) {
         resolve();
+        return;
       }
 
       mqttClient = mqtt.connect('mqtt://'+configurations.mqtt.hostname);
@@ -78,7 +85,9 @@ function run() {
         handleError('Cannot connect to MQTT broker.');
         reject();
       });
+
     });
+
     promise.then(function() {
       return new Promise(function (resolve, reject) {
         //Retrive last proceed tweet id
@@ -102,11 +111,16 @@ function run() {
             resolve(res);
           }
           else {
-            // new tweets have not been found
-            // close the database, disconnect from MQTT broker
-            // and reject the second promise
+            // reject the second promise because new tweets have not been found
             reject(err);
-            handleError(err);
+            console.log(err);
+
+            if (false === configurations.infinite) {
+              // close the database, disconnect from MQTT broker
+              db.close();
+              mqttClient.end();
+              process.exit();
+            }
           }
         });
       });
@@ -130,10 +144,10 @@ function run() {
   catch(err) {
     handleError(err);
   }
+
+  if ( (typeof configurations !== "undefined") && (true === configurations.infinite) ) {
+    setInterval(run, configurations.duration*1000);
+  }
 }
 
 run();
-
-if (true === configurations.infinite) {
-  setInterval(run, configurations.duration*1000);
-}
