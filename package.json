@@ -1,0 +1,38 @@
+{
+  "name": "twitter-iot",
+  "version": "1.0.0",
+  "description": "Twitter bot connected to Internet of Things (IoT) ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leon-anavi/twitter-iot.git"
+  },
+  "keywords": [
+    "twitter",
+    "iot",
+    "tweet",
+    "retweet",
+    "favorite",
+    "mqtt",
+    "publish",
+    "topic",
+    "gadget",
+    "bot"
+  ],
+  "dependencies": {
+    "mqtt":">=1.1.2",
+    "promise":">=7.0.1",
+    "twit":">=1.1.20",
+    "mongojs":">=0.18.2",
+    "forever":"*"
+  },
+  "author": "Leon Anavi <leon@anavi.org>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/leon-anavi/twitter-iot/issues"
+  },
+  "homepage": "https://github.com/leon-anavi/twitter-iot#readme"
+}
