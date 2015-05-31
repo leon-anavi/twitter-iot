@@ -24,9 +24,9 @@ sudo apt-get install mongodb
 sudo npm install twitter-iot -g
 ```
 * Go to https://apps.twitter.com/ and get consumer_key, consumer_secret, access_token and access_token_secret for your new app
-* Create config.json and edit the configurations in it
+* Replace **{prefix}** with the corresponding path (usually /usr/local) and execute the following command to create config.json and after than edit the configurations in it:
 ```
-cp config-sample.json config.json
+cp {prefix}/lib/node_modules/twitter-iot/config-sample.json {prefix}/lib/node_modules/twitter-iot/config.json
 ```
 * Run twitter-iot
 To run the application once edit config.json, set infinite to false and run:
