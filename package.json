@@ -1,6 +1,6 @@
 {
   "name": "twitter-iot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Twitter bot connected to Internet of Things (IoT) ",
   "main": "app.js",
   "scripts": {
