@@ -19,13 +19,9 @@ sudo apt-get install nodejs
 sudo apt-get install npm
 sudo apt-get install mongodb
 ```
-* Install the following npm packages: twit, mongojs, promise
+* Install the twitter-iot using npm
 ```
-sudo npm install twit
-sudo npm install mongojs
-sudo npm install promise
-sudo npm install mqtt
-sudo npm install forever
+sudo npm install twitter-iot -g
 ```
 * Go to https://apps.twitter.com/ and get consumer_key, consumer_secret, access_token and access_token_secret for your new app
 * Create config.json and edit the configurations in it
@@ -35,9 +31,9 @@ cp config-sample.json config.json
 * Run twitter-iot
 To run the application once edit config.json, set infinite to false and run:
 ```
-node app.js
+twitter-iot
 ```
 To run the application forever edit config.json, set infinite to true, set duration to 5 seconds or more and run:
 ```
-forever app.js
+forever /usr/local/bin/twitter-iot
 ```

@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 var db = null;
 var mqtt = require('mqtt');
 var mqttClient = null;
@@ -5,7 +7,7 @@ var mqttClient = null;
 function handleError(err) {
 
   if ( (typeof err.code !== 'undefined') && ('MODULE_NOT_FOUND' === err.code) ) {
-    console.log('Error: please create config.json and save in it Twitter credentials.');
+    console.log('Error: please create config.json and save in it the credentials of your Twitter app.');
     console.log('Example configuration is provided in config-sample.json');
   }
   else if (typeof err.message !== 'undefined') {
