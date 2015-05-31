@@ -51,11 +51,11 @@ function run() {
     var collections = ["crawler"];
     if (null === db) {
       db = require("mongojs").connect(databaseUrl, collections);
-    }
 
-    db.on('error', function(err) {
-      handleError('MongoDB '+err);
-    });
+      db.on('error', function(err) {
+        handleError('MongoDB '+err);
+      });
+    }
 
     var isMqttConnectionEstablished = false;
 
