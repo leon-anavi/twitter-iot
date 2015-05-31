@@ -15,8 +15,8 @@
     "hostname": "example.com",
     "topic": "iot",
     "message": "Hello MQTT",
-    "enabled": true
+    "enabled": false
   },
-  "infinite": true,
+  "infinite": false,
   "duration": 10
 }

@@ -15,7 +15,12 @@ function search(handle, mqttClient, search,
     since_id: since, count: configTweetsCount }, function(err, data, response) {
 
     if (null !== err) {
-      callback(err, 0);
+      if (typeof err.message !== "undefined") {
+        callback(err.message, 0);
+      }
+      else {
+        callback(err, 0);
+      }
       return;
     }
 
