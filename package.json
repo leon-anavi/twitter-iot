@@ -1,6 +1,6 @@
 {
   "name": "twitter-iot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Twitter bot connected to Internet of Things (IoT) ",
   "main": "app.js",
   "scripts": {
@@ -23,11 +23,11 @@
     "bot"
   ],
   "dependencies": {
-    "mqtt":">=1.1.2",
-    "promise":">=7.0.1",
-    "twit":">=1.1.20",
-    "mongojs":">=0.18.2",
-    "forever":"*"
+    "mqtt": ">=1.1.2",
+    "promise": ">=7.0.1",
+    "twit": ">=1.1.20",
+    "mongojs": ">=0.18.2",
+    "forever": "*"
   },
   "author": "Leon Anavi <leon@anavi.org>",
   "license": "GPL-3.0",
@@ -37,6 +37,6 @@
   "homepage": "https://github.com/leon-anavi/twitter-iot#readme",
   "preferGlobal": "true",
   "bin": {
-    "twitter-iot" : "./app.js"
+    "twitter-iot": "./app.js"
   }
 }
