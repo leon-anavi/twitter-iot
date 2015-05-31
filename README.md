@@ -37,3 +37,6 @@ To run the application forever edit config.json, set infinite to true, set durat
 ```
 forever /usr/local/bin/twitter-iot
 ```
+##License
+
+The source code of twitter-iot is available under GPLv3 license. Please contribute changes to the project through GitHub pull requests.
