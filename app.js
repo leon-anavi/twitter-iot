@@ -3,7 +3,7 @@
 var db = null;
 var mqtt = require('mqtt');
 var mqttClient = null;
-var configurationsPath = './config.json';
+var configPath = './config.json';
 
 function handleError(err) {
 
@@ -40,7 +40,7 @@ function handleError(err) {
 
 function run() {
   try {
-    var configurations = require(configurationsPath);
+    var configurations = require(configPath);
     var Promise = require('promise');
 
     var Twit = require('twit')
@@ -167,11 +167,14 @@ function help() {
   console.log('   -h, --help ');
   console.log('      display this help and exit');
   console.log('');
+  console.log('   -c, --config {file}');
+  console.log('      {file} is the path to a configuration file');
+  console.log('');
   process.exit();
 }
 
-function unknownArgument() {
-  console.log('twitter-iot: invalid option -- '+process.argv[index]);
+function unknownArgument(value) {
+  console.log('twitter-iot: invalid option -- '+value);
   console.log('Try with \'--help\' for more information.');
   process.exit();
 }
@@ -184,8 +187,19 @@ function processArgumnets() {
       case "--help":
         help();
       break;
+      case "-c":
+      case "--config":
+        if (typeof process.argv[index+1] !== "undefined") {
+          index += 1;
+          configPath = process.argv[index];
+          if ( (0 !== configPath.indexOf('/')) &&
+               (0 !== configPath.indexOf('.')) ) {
+            configPath = './'+configPath;
+          }
+        }
+      break;
       default:
-        unknownArgument();
+        unknownArgument(process.argv[index]);
       break;
     }
   }
