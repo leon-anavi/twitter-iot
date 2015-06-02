@@ -3,6 +3,7 @@
 var db = null;
 var mqtt = require('mqtt');
 var mqttClient = null;
+var configurationsPath = './config.json';
 
 function handleError(err) {
 
@@ -39,7 +40,7 @@ function handleError(err) {
 
 function run() {
   try {
-    var configurations = require('./config.json');
+    var configurations = require(configurationsPath);
     var Promise = require('promise');
 
     var Twit = require('twit')
@@ -152,4 +153,43 @@ function run() {
   }
 }
 
+function help() {
+  console.log('');
+  console.log('NAME');
+  console.log('   twitter-iot - twitter bot which communicates with Internet of Things.');
+  console.log('');
+  console.log('SYNOPSIS');
+  console.log('   twitter-iot [options] [file]');
+  console.log('');
+  console.log('DESCRIPTION');
+  console.log('   Open source twitter bot which communicates with Internet of Things over MQTT.');
+  console.log('');
+  console.log('   -h, --help ');
+  console.log('      display this help and exit');
+  console.log('');
+  process.exit();
+}
+
+function unknownArgument() {
+  console.log('twitter-iot: invalid option -- '+process.argv[index]);
+  console.log('Try with \'--help\' for more information.');
+  process.exit();
+}
+
+function processArgumnets() {
+  var index = ("node" === process.argv[0]) ? 2 : 1;
+  for (index; index < process.argv.length; index++){
+    switch(process.argv[index]) {
+      case "-h":
+      case "--help":
+        help();
+      break;
+      default:
+        unknownArgument();
+      break;
+    }
+  }
+}
+
+processArgumnets();
 run();
