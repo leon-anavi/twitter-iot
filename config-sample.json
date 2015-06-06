@@ -1,4 +1,5 @@
 {
+  "id": "twitter-iot",
   "twitter": {
     "consumer_key":         "",
     "consumer_secret":      "",

@@ -1,11 +1,15 @@
-function getLastTweetId(db, callback) {
+function getBotSince(botId) {
+  return botId + "-since";
+}
 
-  db.crawler.find({type: "since"}, function(err, data) {
+function getLastTweetId(botId, db, callback) {
+
+  db.crawler.find({type: getBotSince(botId) }, function(err, data) {
     var lastProcessedTweet = 0;
     if( (null != err) || (0 == data.length) ) {
       //save a default value
       //this part of the code will be run only once at first launch of the script
-      initLastTweetId(db);
+      initLastTweetId(botId, db);
     }
     else {
       lastProcessedTweet = data[0].id;
@@ -15,9 +19,9 @@ function getLastTweetId(db, callback) {
 
 }
 
-function initLastTweetId(db) {
+function initLastTweetId(botId, db) {
 
-  db.crawler.save({type: "since", id: 0}, function(err, saved) {
+  db.crawler.save({type: getBotSince(botId), id: 0}, function(err, saved) {
     if( err || !saved ) {
       console.log("ERROR! Unable to save data: "+err);
     }
@@ -28,11 +32,11 @@ function initLastTweetId(db) {
 
 }
 
-function setLastTweetId(db, tweetId, callback) {
+function setLastTweetId(botId, db, tweetId, callback) {
 
   console.log('Latest tweet ID: '+tweetId);
 
-  db.crawler.update({type: "since"}, {$set: {id: tweetId}}, function(err, updated) {
+  db.crawler.update({type: getBotSince(botId) }, {$set: {id: tweetId}}, function(err, updated) {
     if( err || !updated ) {
       console.log("Tweet ID not updated");
     }

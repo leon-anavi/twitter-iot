@@ -94,7 +94,7 @@ function run() {
     promise.then(function() {
       return new Promise(function (resolve, reject) {
         //Retrive last proceed tweet id
-        utilsData.getLastTweetId(db, function(res) { resolve(res); });
+        utilsData.getLastTweetId(configurations.id, db, function(res) { resolve(res); });
       });
     })
     .then(function(lastTweetId) {
@@ -131,7 +131,7 @@ function run() {
     .then(function(tweetId) {
       //Save the latest tweet ID to the db
       return new Promise(function (resolve, reject) {
-        utilsData.setLastTweetId(db, tweetId, function() {
+        utilsData.setLastTweetId(configurations.id, db, tweetId, function() {
           resolve();
         });
       });

@@ -26,17 +26,22 @@ sudo npm install twitter-iot -g
 * Go to https://apps.twitter.com/ and get consumer_key, consumer_secret, access_token and access_token_secret for your new app
 * Replace **{prefix}** with the corresponding path (usually /usr/local) and execute the following command to create config.json and after than edit the configurations in it:
 ```
-cp {prefix}/lib/node_modules/twitter-iot/config-sample.json {prefix}/lib/node_modules/twitter-iot/config.json
+cp {prefix}/lib/node_modules/twitter-iot/config-sample.json config.json
 ```
 * Run twitter-iot
 To run the application once edit config.json, set infinite to false and run:
 ```
-twitter-iot
+twitter-iot --config config.json
 ```
 To run the application forever edit config.json, set infinite to true, set duration to 5 seconds or more and run:
 ```
-forever /usr/local/bin/twitter-iot
+forever /usr/local/bin/twitter-iot --config config.json
 ```
+For more information type:
+```
+twitter-iot --help
+```
+
 ##License
 
 The source code of twitter-iot is available under GPLv3 license. Please contribute changes to the project through GitHub pull requests.
